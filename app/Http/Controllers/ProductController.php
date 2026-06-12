@@ -7,6 +7,7 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\File;
 
 class ProductController extends Controller
 {
@@ -77,14 +78,24 @@ class ProductController extends Controller
     public function show(string $id)
     {
         //
+        $product = Product::findOrFail($id);
+        return view('product.show')->with('product', $product);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit($id)
     {
         //
+
+        $categories = array();
+
+        foreach(Category::all() as $cat){
+            $categories[$cat->id] = $cat->name;
+        }
+        $product = Product::findOrFail($id);
+        return view('product.edit') -> with('product', $product) -> with('categories', $categories);
     }
 
     /**
@@ -92,7 +103,46 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+            // dd($request->all());
+        //do validation
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|max:20|min:3',
+            'category_id' => 'required | integer',
+            'price' => 'required|max:20|min:3',
+            'image' => 'mimes:jpg,jpeg,png,gif',
+            'description' => 'required|max:1000|min:10',
+        ]);
+
+        if ($validator -> fails()){
+            return redirect('/product/'. $id .'/edit')->withInput()->withErrors($validator);
+        }
+
+        //get to update
+
+        $product = Product::find($id);
+
+        //create the POST
+
+        if($request->file('image') != null){
+            $image = $request -> file('image');
+            $upload = 'img/';
+            $filename = time().$image->getClientOriginalName();
+            move_uploaded_file($image->getPathname(), $upload . $filename);
+        }
+
+
+        $product->name = $request->name;
+        $product->category_id = $request->Input('category_id');
+        $product->price = $request->input('price');
+
+        if(isset($filename)){
+            $product->image = $filename;
+        }
+        $product->description = $request->input('description');
+
+        $product->save();
+        Session::flash('product_update', 'Data is updated.');
+        return redirect('/product/'. $id .'/edit');
     }
 
     /**
@@ -101,5 +151,13 @@ class ProductController extends Controller
     public function destroy(string $id)
     {
         //
+
+        $product = Product::find($id);
+        $image_path = 'img/'.$product->image;
+        File::delete($image_path);
+        $product->delete();
+        Session::flash('product_delete', 'Data is deleted.');
+        return redirect('/product');
+
     }
 }
