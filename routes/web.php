@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
-
+use App\Http\Controllers\FrontendController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -76,3 +76,7 @@ Route::get('/product/{product}',[ProductController::class,'show'])->name('produc
 Route::delete('/product/{product}',[ProductController::class,'destroy'])->name('product.destroy');
 Route::get('/product/{product}/edit',[ProductController::class,'edit'])->name('product.edit');
 Route::put('/product/{product}',[ProductController::class,'update'])->name('product.update');
+
+//Frontend
+
+Route::get('/',[FrontendController::class,'index']);
