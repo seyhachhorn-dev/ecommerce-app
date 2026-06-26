@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class FrontendController extends Controller
@@ -36,7 +38,8 @@ class FrontendController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $product = Product::findOrFail($id);
+        return view('frontend.show')->with('product', $product);
     }
 
     /**
@@ -61,5 +64,11 @@ class FrontendController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+    public function list()
+    {
+        $categories = Category::all();
+        $products = Product::orderBy('created_at','DESC')->paginate(3);
+      return view('frontend.list')->with('products',$products)->with('categories', $categories);
     }
 }
