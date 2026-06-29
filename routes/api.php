@@ -1,4 +1,6 @@
 <?php
+
+use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PostController;
 Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
@@ -8,3 +10,9 @@ Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.upda
 Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 
 
+Route::post('/register', [AuthController::class, 'register']); 
+Route::post('/login', [AuthController::class, 'login'])->name('login'); 
+Route::middleware('auth:sanctum')->group(function () { 
+    Route::get('/dashboard', [AuthController::class, 'dashboard']); 
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout'); 
+});
